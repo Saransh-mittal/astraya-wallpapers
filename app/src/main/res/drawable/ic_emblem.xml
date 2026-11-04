@@ -1,0 +1,15 @@
+<!-- The Astraya emblem, path copied from apps/web/public/brand/astraya-emblem-mono.svg in the game repo. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="1400"
+    android:viewportHeight="1400">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M0,0h1400v1400h-1400z" />
+    <group android:translateX="203" android:translateY="204">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M503 0L517 52L382 610L0 992ZM536 60L993 992L744 800L804 752L677 676L513 156ZM503 394L503 512L440 552ZM503 512L566 552L503 697ZM503 394L566 552L503 512ZM440 552L503 512L503 697Z" />
+    </group>
+</vector>

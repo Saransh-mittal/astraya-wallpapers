@@ -1,0 +1,51 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.14.3"
+
+      - name: Decode signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.ASTRAYA_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/astraya.jks"
+            echo "ASTRAYA_KEYSTORE=$RUNNER_TEMP/astraya.jks" >> "$GITHUB_ENV"
+          fi
+
+      - name: Build
+        env:
+          ASTRAYA_KEYSTORE_PASSWORD: ${{ secrets.ASTRAYA_KEYSTORE_PASSWORD }}
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: gradle --no-daemon assembleRelease
+
+      # A release (not an Actions artifact) so the phone gets a plain .apk from a
+      # fixed link: releases/latest/download/astraya-wallpapers.apk
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk astraya-wallpapers.apk
+          gh release create "build-${{ github.run_number }}" astraya-wallpapers.apk \
+            --title "Astraya Wallpapers build ${{ github.run_number }}" \
+            --notes "Built from ${{ github.sha }}" --latest
