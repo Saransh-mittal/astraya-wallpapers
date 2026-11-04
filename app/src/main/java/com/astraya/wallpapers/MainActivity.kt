@@ -39,8 +39,6 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.statusBarColor = bg
-        window.navigationBarColor = bg
 
         val col = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -81,7 +79,9 @@ class MainActivity : Activity() {
             12f, muted,
         ).also { it.setPadding(0, dp(28), 0, 0) })
 
-        setContentView(ScrollView(this).apply { setBackgroundColor(bg); addView(col) })
+        // Android 15+ draws every app edge to edge: keep the content clear of the
+        // status bar and the gesture bar.
+        setContentView(ScrollView(this).apply { setBackgroundColor(bg); fitsSystemWindows = true; addView(col) })
     }
 
     override fun onResume() {
