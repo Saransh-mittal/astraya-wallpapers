@@ -9,6 +9,8 @@ data class Wallpaper(
 ) {
     val isLive get() = asset.startsWith("live/")
     val poster get() = "posters/$id.jpg"
+    /** What the wallpaper service plays: the loop, or the still as a 1 fps clip. */
+    val clip get() = if (isLive) asset else "stillclips/$id.mp4"
 }
 
 object Catalog {
@@ -57,9 +59,26 @@ object Catalog {
         still("astraya-ashen", "The Ashen God"),
     )
 
-    /** What "Set up everything" applies: a living home, a still lock screen. */
-    val setupLive = live.first()
-    val setupLock = lock.first()
+    /** Everything a slideshow can hold: the moving ones, then the clean stills. */
+    val all = live + home
 
     fun byId(id: String?) = live.firstOrNull { it.id == id }
+    fun byAnyId(id: String?) = all.firstOrNull { it.id == id }
+
+    /** On the lock screen a still shows its wordmark version. */
+    fun forLock(w: Wallpaper) = lock.firstOrNull { it.id == w.id + "-lock" } ?: w
+
+    private val mix = live.zip(home).flatMap { (l, s) -> listOf(l, s) }
+
+    /** One-tap slideshows. A null lock list means the same on both screens. */
+    val presets = listOf(
+        Preset("Astraya Mix", "Every wallpaper in turn, moving and still, on both screens.", mix, null),
+        Preset("Living Story", "The ten moving wallpapers, on both screens.", live, null),
+        Preset("Moving home, still lock", "Moving on the home screen; the wordmark stills on the lock screen.", live, home),
+        Preset("Paintings", "The stills only, on both screens.", home, null),
+        Preset("Nothing edition", "Dot-matrix on true black, both screens: the lightest on battery.", home.filter { "dots" in it.id }, null),
+    )
 }
+
+/** A ready-made slideshow. [lock] is null when both screens share [home]. */
+data class Preset(val name: String, val note: String, val home: List<Wallpaper>, val lock: List<Wallpaper>?)
